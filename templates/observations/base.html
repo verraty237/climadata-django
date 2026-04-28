@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ClimaData Cameroun</title>
+  {% load static %}
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🌿</div>
+      <div class="logo-text">
+        <span class="logo-title">CLIMADATA</span>
+        <span class="logo-sub">CAMEROUN</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="{% url 'accueil' %}" class="nav-item {% if request.resolver_match.url_name == 'accueil' %}active{% endif %}">
+        <span class="nav-icon">⬡</span>
+        <span>Accueil</span>
+      </a>
+      <a href="{% url 'collecte' %}" class="nav-item {% if request.resolver_match.url_name == 'collecte' %}active{% endif %}">
+        <span class="nav-icon">⊕</span>
+        <span>Collecte</span>
+      </a>
+      <a href="{% url 'carte' %}" class="nav-item {% if request.resolver_match.url_name == 'carte' %}active{% endif %}">
+        <span class="nav-icon">◎</span>
+        <span>Carte</span>
+      </a>
+      <a href="{% url 'statistiques' %}" class="nav-item {% if request.resolver_match.url_name == 'statistiques' %}active{% endif %}">
+        <span class="nav-icon">⟁</span>
+        <span>Statistiques</span>
+      </a>
+      <a href="{% url 'export' %}" class="nav-item {% if request.resolver_match.url_name == 'export' %}active{% endif %}">
+        <span class="nav-icon">↗</span>
+        <span>Export</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button id="theme-btn">☀ Mode clair</button>
+      <div class="version">INF232 EC2 · v1.0</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-wrap">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <span class="page-title">{% block page_title %}ClimaData{% endblock %}</span>
+        <span class="breadcrumb">ClimaData / {% block breadcrumb %}Accueil{% endblock %}</span>
+      </div>
+      <div class="topbar-right">
+        <div class="status-dot"></div>
+        <span class="status-text">Base connectée</span>
+        <div class="datetime" id="datetime"></div>
+      </div>
+    </header>
+
+    <!-- MESSAGES -->
+    {% if messages %}
+    <div class="messages-wrap">
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- CONTENU -->
+    <main class="content">
+      {% block content %}{% endblock %}
+    </main>
+
+  </div>
+
+  <script>
+    // Horloge
+    function updateClock() {
+      const now = new Date()
+      const date = now.toLocaleDateString('fr-FR')
+      const time = now.toTimeString().slice(0,8)
+      document.getElementById('datetime').textContent = `${date} · ${time}`
+    }
+    setInterval(updateClock, 1000)
+    updateClock()
+
+    // Mode clair/sombre
+    document.getElementById('theme-btn').addEventListener('click', () => {
+      document.body.classList.toggle('light')
+      const isLight = document.body.classList.contains('light')
+      document.getElementById('theme-btn').textContent = isLight ? '🌙 Mode sombre' : '☀ Mode clair'
+    })
+  </script>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

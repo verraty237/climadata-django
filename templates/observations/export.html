@@ -1,0 +1,64 @@
+{% extends 'observations/base.html' %}
+
+{% block page_title %}Export des données{% endblock %}
+{% block breadcrumb %}Export{% endblock %}
+
+{% block content %}
+
+<div class="export-header">
+  <h2>Export des données</h2>
+  <p>Téléchargez vos données dans différents formats</p>
+</div>
+
+<!-- CARTES EXPORT -->
+<div class="export-grid">
+
+  <div class="export-card">
+    <div class="export-icon">📄</div>
+    <div class="export-title">Export CSV</div>
+    <div class="export-desc">Toutes les observations en format tableur compatible Excel</div>
+    <a href="{% url 'export_csv' %}" class="export-btn">Télécharger CSV</a>
+  </div>
+
+  <div class="export-card">
+    <div class="export-icon">{ }</div>
+    <div class="export-title">Export JSON</div>
+    <div class="export-desc">Format structuré pour développeurs et intégrations</div>
+    <a href="{% url 'export_json' %}" class="export-btn">Télécharger JSON</a>
+  </div>
+
+  <div class="export-card">
+    <div class="export-icon">🖨</div>
+    <div class="export-title">Rapport PDF</div>
+    <div class="export-desc">Imprimez ou sauvegardez un rapport complet</div>
+    <button class="export-btn" onclick="window.print()">Imprimer / PDF</button>
+  </div>
+
+</div>
+
+<!-- RÉSUMÉ -->
+<div class="dash-card" style="margin-top:20px">
+  <div class="card-header">
+    <span class="card-title">Résumé des données</span>
+  </div>
+  <div class="export-summary">
+    <div class="sum-item">
+      <div class="sk">Total observations</div>
+      <div class="sv">{{ total }}</div>
+    </div>
+    <div class="sum-item">
+      <div class="sk">Régions couvertes</div>
+      <div class="sv">{{ regions }}</div>
+    </div>
+    <div class="sum-item">
+      <div class="sk">Temp. max moyenne</div>
+      <div class="sv">{{ temp_avg }}°</div>
+    </div>
+    <div class="sum-item">
+      <div class="sk">Pluie totale (mm)</div>
+      <div class="sv">{{ pluie_total }}</div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

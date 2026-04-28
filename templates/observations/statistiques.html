@@ -1,0 +1,240 @@
+{% extends 'observations/base.html' %}
+
+{% block page_title %}Analyse statistique{% endblock %}
+{% block breadcrumb %}Statistiques{% endblock %}
+
+{% block content %}
+
+<div class="stats-header">
+  <h2>Analyse statistique descriptive</h2>
+</div>
+
+<!-- CARTES DESCRIPTIVES -->
+<div class="desc-grid">
+  <div class="desc-card">
+    <div class="dk">Temp. max — Moyenne</div>
+    <div class="dv">{% if stats_temp.avg %}{{ stats_temp.avg|floatformat:1 }} °C{% else %}—{% endif %}</div>
+    <div class="ds">Min {{ stats_temp.min|default:"—" }} · Max {{ stats_temp.max|default:"—" }}</div>
+  </div>
+  <div class="desc-card">
+    <div class="dk">Temp. min — Moyenne</div>
+    <div class="dv">{% if stats_tmin.avg %}{{ stats_tmin.avg|floatformat:1 }} °C{% else %}—{% endif %}</div>
+    <div class="ds">Min {{ stats_tmin.min|default:"—" }} · Max {{ stats_tmin.max|default:"—" }}</div>
+  </div>
+  <div class="desc-card">
+    <div class="dk">Pluviométrie — Moyenne</div>
+    <div class="dv">{% if stats_pluie.avg %}{{ stats_pluie.avg|floatformat:1 }} mm{% else %}—{% endif %}</div>
+    <div class="ds">Min {{ stats_pluie.min|default:"—" }} · Max {{ stats_pluie.max|default:"—" }}</div>
+  </div>
+  <div class="desc-card">
+    <div class="dk">Humidité — Moyenne</div>
+    <div class="dv">{% if stats_hum.avg %}{{ stats_hum.avg|floatformat:1 }} %{% else %}—{% endif %}</div>
+    <div class="ds">Min {{ stats_hum.min|default:"—" }} · Max {{ stats_hum.max|default:"—" }}</div>
+  </div>
+  <div class="desc-card">
+    <div class="dk">Vent — Moyenne</div>
+    <div class="dv">{% if stats_vent.avg %}{{ stats_vent.avg|floatformat:1 }} km/h{% else %}—{% endif %}</div>
+    <div class="ds">Max {{ stats_vent.max|default:"—" }} km/h</div>
+  </div>
+  <div class="desc-card">
+    <div class="dk">Total observations</div>
+    <div class="dv">{{ observations.count }}</div>
+    <div class="ds">Toutes régions confondues</div>
+  </div>
+</div>
+
+<!-- GRAPHIQUES -->
+<div class="stats-charts-grid">
+  <div class="dash-card">
+    <div class="card-header">
+      <span class="card-title">Distribution température max</span>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-dist-temp" role="img" aria-label="Distribution températures"></canvas>
+    </div>
+  </div>
+  <div class="dash-card">
+    <div class="card-header">
+      <span class="card-title">Pluviométrie par région</span>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-pluie" role="img" aria-label="Pluviométrie"></canvas>
+    </div>
+  </div>
+  <div class="dash-card">
+    <div class="card-header">
+      <span class="card-title">État de la végétation</span>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-veg" role="img" aria-label="Végétation"></canvas>
+    </div>
+  </div>
+  <div class="dash-card">
+    <div class="card-header">
+      <span class="card-title">Phénomènes observés</span>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-pheno" role="img" aria-label="Phénomènes"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- TABLEAU -->
+<div class="dash-card" style="margin-top:16px">
+  <div class="card-header">
+    <span class="card-title">Données brutes</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Date</th>
+          <th>Région</th>
+          <th>Ville</th>
+          <th>T°min</th>
+          <th>T°max</th>
+          <th>Pluie</th>
+          <th>Qualité air</th>
+          <th>Végétation</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in observations %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ o.date_obs }}</td>
+          <td>{{ o.region }}</td>
+          <td>{{ o.ville }}</td>
+          <td>{% if o.temp_min %}{{ o.temp_min }}°{% else %}—{% endif %}</td>
+          <td>{% if o.temp_max %}{{ o.temp_max }}°{% else %}—{% endif %}</td>
+          <td>{% if o.pluie %}{{ o.pluie }} mm{% else %}—{% endif %}</td>
+          <td>
+            {% if o.qualite_air %}
+            <span class="badge
+              {% if o.qualite_air == 'Bonne' %}badge-bonne
+              {% elif o.qualite_air == 'Moyenne' %}badge-moyenne
+              {% elif o.qualite_air == 'Mauvaise' %}badge-mauvaise
+              {% else %}badge-tres{% endif %}">
+              {{ o.qualite_air }}
+            </span>
+            {% else %}—{% endif %}
+          </td>
+          <td>{{ o.vegetation|default:"—" }}</td>
+          <td>
+            <a href="{% url 'supprimer' o.pk %}"
+               onclick="return confirm('Supprimer cette observation ?')"
+               class="btn-del">Suppr.</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="10" class="empty-msg">Aucune donnée enregistrée.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const regions    = {{ regions|safe }}
+const pluieRegs  = {{ pluie_regs|safe }}
+const vegLabels  = {{ veg_labels|safe }}
+const vegData    = {{ veg_data|safe }}
+const phenoLabels = {{ pheno_labels|safe }}
+const phenoData  = {{ pheno_data|safe }}
+const distData   = {{ dist_data|safe }}
+const distDates  = {{ dist_dates|safe }}
+
+// Distribution température
+new Chart(document.getElementById('chart-dist-temp'), {
+  type: 'bar',
+  data: {
+    labels: distDates,
+    datasets: [{
+      data: distData,
+      backgroundColor: '#ff8c4288',
+      borderColor: '#ff8c42',
+      borderWidth: 1
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: '#7a92c4', font:{size:10} }, grid: { color: '#1e2d4a' } },
+      y: { ticks: { color: '#7a92c4' }, grid: { color: '#1e2d4a' } }
+    }
+  }
+})
+
+// Pluviométrie
+new Chart(document.getElementById('chart-pluie'), {
+  type: 'bar',
+  data: {
+    labels: regions,
+    datasets: [{
+      data: pluieRegs,
+      backgroundColor: '#0099cc88',
+      borderColor: '#0099cc',
+      borderWidth: 1
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: '#7a92c4', font:{size:10} }, grid: { color: '#1e2d4a' } },
+      y: { ticks: { color: '#7a92c4' }, grid: { color: '#1e2d4a' }, beginAtZero: true }
+    }
+  }
+})
+
+// Végétation
+new Chart(document.getElementById('chart-veg'), {
+  type: 'pie',
+  data: {
+    labels: vegLabels,
+    datasets: [{
+      data: vegData,
+      backgroundColor: ['#00d4aa', '#ff8c42', '#ff4757'],
+      borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true, position: 'bottom',
+        labels: { color: '#7a92c4', font:{size:11} }
+      }
+    }
+  }
+})
+
+// Phénomènes
+new Chart(document.getElementById('chart-pheno'), {
+  type: 'doughnut',
+  data: {
+    labels: phenoLabels,
+    datasets: [{
+      data: phenoData,
+      backgroundColor: ['#ff8c42','#0099cc','#ff4757','#9b59f5','#00d4aa'],
+      borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true, position: 'bottom',
+        labels: { color: '#7a92c4', font:{size:11} }
+      }
+    }
+  }
+})
+</script>
+{% endblock %}

@@ -1,0 +1,158 @@
+{% extends 'observations/base.html' %}
+
+{% block page_title %}Tableau de bord{% endblock %}
+{% block breadcrumb %}Accueil{% endblock %}
+
+{% block content %}
+
+<div class="welcome-banner">
+  <div class="welcome-text">
+    <h2>Système de surveillance climatique</h2>
+    <p>Collecte et analyse en temps réel des données environnementales du Cameroun</p>
+  </div>
+  <div class="welcome-badge">ACTIF</div>
+</div>
+
+<!-- KPI -->
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-icon">📊</div>
+    <div class="kpi-val">{{ total }}</div>
+    <div class="kpi-lbl">Observations totales</div>
+    <div class="kpi-bar"><div class="kpi-fill" style="width:100%"></div></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon">🌡</div>
+    <div class="kpi-val">{{ temp_avg }}°</div>
+    <div class="kpi-lbl">Temp. max moyenne (°C)</div>
+    <div class="kpi-bar"><div class="kpi-fill kpi-fill-orange" style="width:60%"></div></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon">🌧</div>
+    <div class="kpi-val">{{ pluie_total }}</div>
+    <div class="kpi-lbl">Pluviométrie totale (mm)</div>
+    <div class="kpi-bar"><div class="kpi-fill kpi-fill-blue" style="width:75%"></div></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon">📍</div>
+    <div class="kpi-val">{{ regions }}</div>
+    <div class="kpi-lbl">Régions couvertes</div>
+    <div class="kpi-bar"><div class="kpi-fill kpi-fill-purple" style="width:40%"></div></div>
+  </div>
+</div>
+
+<!-- GRAPHIQUES -->
+<div class="dashboard-grid">
+  <div class="dash-card wide">
+    <div class="card-header">
+      <span class="card-title">Évolution des températures</span>
+      <span class="card-badge">TEMPS RÉEL</span>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-evolution" role="img" aria-label="Évolution températures"></canvas>
+    </div>
+  </div>
+  <div class="dash-card">
+    <div class="card-header">
+      <span class="card-title">Qualité de l'air</span>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-air" role="img" aria-label="Qualité air"></canvas>
+    </div>
+  </div>
+  <div class="dash-card">
+    <div class="card-header">
+      <span class="card-title">Dernières observations</span>
+    </div>
+    <div class="recent-list">
+      {% for o in dernieres %}
+      <div class="recent-item">
+        <div>
+          <span class="recent-region">{{ o.region }}</span>
+          <span style="color:var(--text3);font-size:11px;margin-left:6px">{{ o.ville }}</span>
+        </div>
+        <span class="recent-temp">{% if o.temp_max %}{{ o.temp_max }}°C{% else %}—{% endif %}</span>
+        <span class="recent-date">{{ o.date_obs }}</span>
+      </div>
+      {% empty %}
+      <p style="color:var(--text3);font-size:13px;text-align:center;padding:20px">
+        Aucune observation
+      </p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const dates = {{ dates|safe }}
+const tmax  = {{ tmax|safe }}
+const tmin  = {{ tmin|safe }}
+const qualites      = {{ qualites|safe }}
+const qualites_data = {{ qualites_data|safe }}
+
+// Graphique évolution
+new Chart(document.getElementById('chart-evolution'), {
+  type: 'line',
+  data: {
+    labels: dates,
+    datasets: [{
+      label: 'T°max',
+      data: tmax,
+      borderColor: '#ff8c42',
+      backgroundColor: '#ff8c4218',
+      tension: 0.4,
+      fill: true,
+      pointRadius: 4,
+      pointBackgroundColor: '#ff8c42'
+    },{
+      label: 'T°min',
+      data: tmin,
+      borderColor: '#00d4aa',
+      backgroundColor: '#00d4aa18',
+      tension: 0.4,
+      fill: true,
+      pointRadius: 4,
+      pointBackgroundColor: '#00d4aa'
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true, labels: { color: '#7a92c4', font: { size: 11 } } }
+    },
+    scales: {
+      x: { ticks: { color: '#7a92c4' }, grid: { color: '#1e2d4a' } },
+      y: { ticks: { color: '#7a92c4' }, grid: { color: '#1e2d4a' } }
+    }
+  }
+})
+
+// Graphique qualité air
+new Chart(document.getElementById('chart-air'), {
+  type: 'doughnut',
+  data: {
+    labels: qualites,
+    datasets: [{
+      data: qualites_data,
+      backgroundColor: ['#00d4aa', '#ff8c42', '#ff4757', '#9b59f5'],
+      borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'bottom',
+        labels: { color: '#7a92c4', font: { size: 11 }, padding: 10 }
+      }
+    }
+  }
+})
+</script>
+{% endblock %}

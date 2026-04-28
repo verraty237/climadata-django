@@ -1,0 +1,113 @@
+{% extends 'observations/base.html' %}
+
+{% block page_title %}Collecte des données{% endblock %}
+{% block breadcrumb %}Collecte{% endblock %}
+
+{% block content %}
+
+<div class="form-container">
+  <div class="form-header">
+    <h2>Nouvelle observation</h2>
+    <p>Enregistrement d'une observation climatique sur le terrain</p>
+  </div>
+
+  <form method="POST">
+    {% csrf_token %}
+
+    <!-- BLOC 01 : LOCALISATION -->
+    <div class="form-block">
+      <div class="form-block-title">
+        <span class="block-num">01</span> Localisation
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          {{ form.region.label_tag }}
+          {{ form.region }}
+          {% if form.region.errors %}
+            <span class="form-error">{{ form.region.errors }}</span>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          {{ form.ville.label_tag }}
+          {{ form.ville }}
+          {% if form.ville.errors %}
+            <span class="form-error">{{ form.ville.errors }}</span>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          {{ form.date_obs.label_tag }}
+          {{ form.date_obs }}
+          {% if form.date_obs.errors %}
+            <span class="form-error">{{ form.date_obs.errors }}</span>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          {{ form.observateur.label_tag }}
+          {{ form.observateur }}
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOC 02 : MÉTÉO -->
+    <div class="form-block">
+      <div class="form-block-title">
+        <span class="block-num">02</span> Données météorologiques
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          {{ form.temp_min.label_tag }}
+          {{ form.temp_min }}
+        </div>
+        <div class="form-group">
+          {{ form.temp_max.label_tag }}
+          {{ form.temp_max }}
+        </div>
+        <div class="form-group">
+          {{ form.pluie.label_tag }}
+          {{ form.pluie }}
+        </div>
+        <div class="form-group">
+          {{ form.vent.label_tag }}
+          {{ form.vent }}
+        </div>
+        <div class="form-group">
+          {{ form.humidite.label_tag }}
+          {{ form.humidite }}
+        </div>
+        <div class="form-group">
+          {{ form.qualite_air.label_tag }}
+          {{ form.qualite_air }}
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOC 03 : ENVIRONNEMENT -->
+    <div class="form-block">
+      <div class="form-block-title">
+        <span class="block-num">03</span> Environnement
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          {{ form.vegetation.label_tag }}
+          {{ form.vegetation }}
+        </div>
+        <div class="form-group">
+          {{ form.phenomene.label_tag }}
+          {{ form.phenomene }}
+        </div>
+        <div class="form-group full">
+          {{ form.observations.label_tag }}
+          {{ form.observations }}
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a href="{% url 'accueil' %}" class="btn-reset">Annuler</a>
+      <button type="submit" id="btn-submit">Enregistrer l'observation</button>
+    </div>
+
+  </form>
+</div>
+
+{% endblock %}
